@@ -1,75 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InfraWatch-Monitor — Infrastructure Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InfraWatch-Monitor — System Metrics Monitor</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="dashboard-header">
-        <div class="header-left">
-            <div class="logo">◎ InfraWatch<span class="badge">Monitor</span></div>
-            <div class="env-badge">PRODUCTION</div>
+<div class="app-container">
+  <header class="app-header">
+    <h1>🖥️ InfraWatch-Monitor</h1>
+    <p class="subtitle">Real-Time System Infrastructure Monitoring Dashboard</p>
+  </header>
+
+  <div class="dashboard-controls">
+    <div class="control-left">
+      <button class="btn btn-primary" id="btnToggle" onclick="toggleSimulation()">▶️ Start Monitoring</button>
+      <select id="intervalSelect" onchange="setInterval()">
+        <option value="1000">1s</option>
+        <option value="2000" selected>2s</option>
+        <option value="5000">5s</option>
+        <option value="10000">10s</option>
+      </select>
+      <button class="btn btn-small" onclick="addServer()">+ Add Server</button>
+    </div>
+    <div class="control-right">
+      <span id="uptimeDisplay" class="uptime-badge">⏱ Uptime: --</span>
+      <button class="btn btn-small" onclick="openThresholds()">⚙️ Thresholds</button>
+      <button class="btn btn-small btn-danger" onclick="resetData()">🗑️ Reset</button>
+    </div>
+  </div>
+
+  <div id="serverGrid" class="server-grid"></div>
+
+  <!-- Server Template (hidden) -->
+  <!-- Thresholds Modal -->
+  <div id="thresholdModal" class="modal" style="display:none">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Alert Thresholds</h3>
+        <button class="btn-close" onclick="closeThresholds()">&times;</button>
+      </div>
+      <div class="threshold-form">
+        <div class="threshold-row">
+          <label>CPU Critical (%)</label>
+          <input type="range" id="thrCPU" min="50" max="100" value="90" oninput="thrLabel('thrCPU','thrCPULabel')">
+          <span id="thrCPULabel">90%</span>
         </div>
-        <div class="header-center">
-            <div class="summary-pill">
-                <span class="pill-dot green"></span>
-                <span id="healthy-count">8</span> Healthy
-            </div>
-            <div class="summary-pill">
-                <span class="pill-dot orange"></span>
-                <span id="warning-count">2</span> Warning
-            </div>
-            <div class="summary-pill">
-                <span class="pill-dot red"></span>
-                <span id="critical-count">1</span> Critical
-            </div>
+        <div class="threshold-row">
+          <label>Memory Critical (%)</label>
+          <input type="range" id="thrMemory" min="50" max="100" value="85" oninput="thrLabel('thrMemory','thrMemoryLabel')">
+          <span id="thrMemoryLabel">85%</span>
         </div>
-        <div class="header-right">
-            <span class="last-updated">Last updated: <span id="last-update">--</span></span>
-            <button class="btn-refresh" id="refresh-btn">↻ Refresh</button>
+        <div class="threshold-row">
+          <label>Disk Critical (%)</label>
+          <input type="range" id="thrDisk" min="50" max="100" value="90" oninput="thrLabel('thrDisk','thrDiskLabel')">
+          <span id="thrDiskLabel">90%</span>
         </div>
-    </header>
-
-    <main class="dashboard-body">
-        <div class="main-grid">
-            <!-- Server Cards Section -->
-            <section class="servers-section">
-                <h2 class="section-title">Server Fleet</h2>
-                <div class="servers-grid" id="servers-grid"></div>
-            </section>
-
-            <!-- Right Sidebar -->
-            <aside class="sidebar">
-                <!-- Alert Panel -->
-                <div class="panel alert-panel">
-                    <div class="panel-title">
-                        <span class="title-icon">⚠</span> Active Alerts
-                        <span class="alert-count" id="alert-count-badge">5</span>
-                    </div>
-                    <div class="alerts-list" id="alerts-list"></div>
-                </div>
-
-                <!-- Services Status -->
-                <div class="panel services-panel">
-                    <div class="panel-title">
-                        <span class="title-icon">⬡</span> Services Health
-                    </div>
-                    <div class="services-list" id="services-list"></div>
-                </div>
-
-                <!-- Network Metrics -->
-                <div class="panel network-panel">
-                    <div class="panel-title">
-                        <span class="title-icon">↕</span> Network I/O
-                    </div>
-                    <div class="network-stats" id="network-stats"></div>
-                </div>
-            </aside>
+        <div class="threshold-row">
+          <label>Network Critical (Mbps)</label>
+          <input type="range" id="thrNetwork" min="50" max="1000" value="500" oninput="thrLabel('thrNetwork','thrNetworkLabel')">
+          <span id="thrNetworkLabel">500</span>
         </div>
-    </main>
+        <button class="btn btn-primary" onclick="saveThresholds()" style="margin-top:16px;width:100%">Save Thresholds</button>
+      </div>
+    </div>
+  </div>
 
-    <script src="app.js"></script>
+  <!-- Add Server Modal -->
+  <div id="serverModal" class="modal" style="display:none">
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <h3>Add Server</h3>
+        <button class="btn-close" onclick="closeServerModal()">&times;</button>
+      </div>
+      <div style="padding:20px">
+        <label>Server Name</label>
+        <input type="text" id="newServerName" placeholder="e.g. web-prod-03">
+        <label style="margin-top:12px">Server Type</label>
+        <select id="newServerType">
+          <option value="web">Web Server</option>
+          <option value="database">Database Server</option>
+          <option value="application">Application Server</option>
+          <option value="cache">Cache Server</option>
+        </select>
+        <button class="btn btn-primary" onclick="confirmAddServer()" style="margin-top:16px;width:100%">Add Server</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
