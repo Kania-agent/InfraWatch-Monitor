@@ -1,97 +1,159 @@
-# 🔭 InfraWatch-Monitor
+# InfraWatch-Monitor
 
-> Real-time infrastructure monitoring with AI-powered anomaly detection, predictive alerts, and unified health dashboards — powered by MiMo V2.5
+![InfraWatch-Monitor banner](assets/banner.png)
 
-## Why This Exists
+> **Powered by MiMo** — built on top of Xiaomi's [MiMo](https://platform.xiaomimimo.com) reasoning models for intelligent infrastructure anomaly detection and predictive alerting.
 
-Infrastructure monitoring has traditionally been a reactive discipline — you set static thresholds, they fire constantly, alert fatigue sets in, and when a real incident hits, the on-call engineer misses the signal buried under a mountain of false positives. CPU spikes to 80% every night during backups. Memory slowly creeps up over weeks. Network latency has seasonal patterns. Static thresholds understand none of this.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Powered by MiMo](https://img.shields.io/badge/Powered%20by-MiMo-ff6b35.svg)](https://platform.xiaomimimo.com)
 
-InfraWatch-Monitor reimagines infrastructure observability with AI at its core. MiMo V2.5 analyzes your metrics streams to learn normal behavioral patterns for each service, host, and metric — then alerts only when something genuinely deviates from the expected baseline. It distinguishes between a CPU spike during a known batch job and the same spike during peak traffic hours, because context matters.
+---
 
-The dashboard unifies server health, network metrics, and service status into a single pane of glass designed for both quick triage and deep investigation. Whether you're running a handful of servers or managing a fleet of hundreds, InfraWatch gives you the situational awareness to stay ahead of incidents rather than chasing them.
+## Why MiMo
 
-## Architecture
+Infrastructure monitoring tools are excellent at collecting metrics — CPU, memory, disk, network, latency — but they're notoriously bad at understanding what those metrics *mean* together. A CPU spike at 3 AM might be a cron job or the beginning of a cascading failure. MiMo V2.5 reasons across multiple metric dimensions simultaneously, correlating signals that threshold-based alerting would treat as independent events.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     InfraWatch-Monitor Pipeline                 │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐      │
-│  │              │    │              │    │              │      │
-│  │   Metrics    │───▶│  Collector   │───▶│  Analyzer    │      │
-│  │   Sources    │    │   Agent      │    │   Engine     │      │
-│  │              │    │              │    │              │      │
-│  └──────────────┘    └──────────────┘    └──────┬───────┘      │
-│                                                 │              │
-│                          ┌──────────────────────┤              │
-│                          │                      │              │
-│                          ▼                      ▼              │
-│                   ┌──────────────┐    ┌──────────────┐        │
-│                   │              │    │              │        │
-│                   │  Dashboard   │    │   Alerts     │        │
-│                   │   Renderer   │    │   Engine     │        │
-│                   │              │    │              │        │
-│                   └──────────────┘    └──────────────┘        │
-│                                                                 │
-│  Sources: CPU · Memory · Disk · Network · Services              │
-│  Output: Health Dashboard + Predictive Alert Feed               │
-└─────────────────────────────────────────────────────────────────┘
-```
+MiMo's strength lies in its ability to build contextual understanding of infrastructure behavior. It learns that a gradual memory increase combined with a slowly climbing p99 latency on a specific service correlates with a connection leak pattern it has seen before. This kind of multi-signal pattern recognition requires the deep reasoning capabilities that MiMo V2.5 provides, going far beyond what statistical anomaly detection alone can achieve.
 
-## Token Consumption Model
+Predictive alerting is where MiMo truly differentiates. Instead of alerting when a threshold is breached (by which point users are already affected), MiMo projects current trajectories forward and alerts engineers when it predicts a breach within the next 30-60 minutes. This shifts operations from reactive firefighting to proactive capacity management, giving teams time to respond before impact occurs.
 
-| Pipeline Stage     | Tokens per Run | Description                                         |
-|--------------------|----------------|-----------------------------------------------------|
-| 📡 Collector Agent  | 50K            | Gather metrics from hosts, normalize data formats   |
-| 🧠 Analyzer Engine  | 300K           | Anomaly detection, baseline learning, trend analysis |
-| 📊 Dashboard Render | 100K           | Generate visualizations, gauges, and health cards    |
-| **Total**          | **450K**       | End-to-end monitoring cycle                          |
+---
+
+## Token Consumption
+
+| Agent | Model | Tokens/run | Frequency | Daily/user |
+|---|---|---|---|---|
+| Anomaly Detector | MiMo V2.5 | 3,000 | Per minute | ~4,320,000 |
+| Context Correlator | MiMo V2.5 | 4,500 | Per anomaly | ~50,000 |
+| Predictive Scorer | MiMo V2.5 | 2,800 | Per 5min | ~806,400 |
+
+---
+
+## What it does
+
+InfraWatch-Monitor collects metrics from Prometheus, Datadog, CloudWatch, and custom sources, then applies MiMo-powered reasoning to detect anomalies, correlate cross-service issues, and predict failures before they happen. It generates actionable alerts with full context — not just "CPU is high" but "CPU is climbing at a rate that predicts saturation in 45 minutes, correlated with memory pressure on the same host."
+
+---
+
+## Why this exists
+
+Modern infrastructure generates thousands of metric streams. Teams drown in false-positive alerts while genuine incidents go unnoticed until users complain. InfraWatch-Monitor exists to replace noisy threshold alerts with intelligent, context-aware incident detection that understands infrastructure holistically and alerts only when it matters.
+
+---
 
 ## Features
 
-- **Server Health Cards** — Real-time CPU, memory, and disk gauges for every monitored host
-- **Intelligent Alerts** — AI-driven anomaly detection replaces static threshold spam
-- **Network Metrics** — Live bandwidth, latency, and connection monitoring with trend analysis
-- **Service Status Grid** — Up/down/degraded status for all monitored services at a glance
-- **Predictive Warning** — Detects slow-burn issues like memory leaks before they trigger incidents
-- **Alert Severity Levels** — Color-coded critical, warning, and info alerts with timestamps
-- **Uptime Tracking** — SLA-based uptime percentages with rolling window calculations
-- **Ops Dashboard Theme** — Professional dark-mode interface built for NOC screens
+- **Multi-source metric collection** — Prometheus, Datadog, CloudWatch, StatsD, custom exporters
+- **MiMo-powered anomaly detection** — contextual, multi-signal analysis
+- **Predictive alerting** — warns before thresholds are breached
+- **Cross-service correlation** — connects related anomalies across microservices
+- **Auto-baselining** — learns normal behavior per service, no manual thresholds
+- **Alert fatigue reduction** — deduplicates and groups related alerts
+- **Runbook suggestions** — generates troubleshooting steps based on detected patterns
+- **Grafana plugin** — native dashboard integration
+- **SLO tracking** — monitors service level objectives and error budgets
+- **Capacity planning** — forecasts resource needs based on current growth trends
+
+---
 
 ## Tech Stack
 
-- **Frontend** — Vanilla HTML5 / CSS3 / JavaScript (ES6+)
-- **Styling** — Custom ops dashboard CSS with SVG gauges and CSS animations
-- **Logic** — Client-side metrics simulation, gauge rendering, and alert logic
-- **AI Engine** — MiMo V2.5 by Nous Research
-- **Deployment** — Static files, works on any modern browser or NOC display
+- **Python 3.11+** — core runtime
+- **MiMo V2.5** — anomaly detection and predictive reasoning via Xiaomi API
+- **Prometheus** — primary metrics collection backend
+- **TimescaleDB** — time-series storage for historical analysis
+- **FastAPI** — REST API and webhook receiver
+- **Celery** — background task processing
+- **Redis** — alert deduplication and caching
+- **Grafana** — dashboard visualization
+- **Docker & Kubernetes** — deployment
 
-## Quick Start
+---
+
+## Quickstart
 
 ```bash
-# Clone the repository
-git clone https://github.com/nousresearch/InfraWatch-Monitor.git
+# Clone and install
+git clone https://github.com/yuroo-shield/InfraWatch-Monitor.git
 cd InfraWatch-Monitor
+pip install -e ".[dev]"
 
-# Launch directly
-open index.html
+# Set your MiMo API key
+export MIMO_API_KEY="your-key-here"
 
-# Or serve on a network-accessible port for NOC displays
-python3 -m http.server 8080
-# Visit http://localhost:8080
+# Start with Docker Compose
+docker-compose up -d
+
+# Configure a Prometheus data source
+infrawatch config add-source \
+  --type prometheus \
+  --url http://localhost:9090 \
+  --name "local-prometheus"
+
+# Start monitoring
+infrawatch monitor start \
+  --predictive \
+  --alert-webhook https://hooks.slack.com/...
+
+# Check current anomaly score
+infrawatch status --verbose
+
+# View capacity forecast
+infrawatch forecast --service api-server --horizon 30d
 ```
+
+---
 
 ## Project Structure
 
 ```
 InfraWatch-Monitor/
-├── index.html          # Dashboard layout with server cards & alert panel
-├── style.css           # Ops dashboard theme with gauge & chart styles
-├── app.js              # Metrics collection, analysis, & alert logic
-└── README.md           # This file
+├── assets/
+│   └── banner.png
+├── infrawatch/
+│   ├── __init__.py
+│   ├── collector.py       # Multi-source metric collection
+│   ├── detector.py        # MiMo-powered anomaly detection
+│   ├── correlator.py      # Cross-service correlation
+│   ├── predictor.py       # Predictive alerting engine
+│   ├── alerter.py         # Alert management and dispatch
+│   ├── baseliner.py       # Auto-baselining engine
+│   ├── slo.py             # SLO tracking and error budgets
+│   └── config.py          # Configuration management
+├── plugins/
+│   ├── prometheus.py
+│   ├── datadog.py
+│   ├── cloudwatch.py
+│   └── grafana.py
+├── tests/
+│   ├── test_detector.py
+│   ├── test_predictor.py
+│   ├── test_correlator.py
+│   └── conftest.py
+├── docker-compose.yml
+├── k8s/
+│   ├── deployment.yaml
+│   └── service.yaml
+├── pyproject.toml
+└── README.md
 ```
 
 ---
 
-> Built with MiMo V2.5 — [Nous Research](https://nousresearch.com)
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Run the test suite before submitting PRs:
+
+```bash
+# Run tests
+pytest tests/ -v
+
+# Run with coverage
+pytest tests/ --cov=infrawatch --cov-report=html
+```
+
+---
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
