@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfraWatch-Monitor — Infrastructure Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="dashboard-header">
+        <div class="header-left">
+            <div class="logo">◎ InfraWatch<span class="badge">Monitor</span></div>
+            <div class="env-badge">PRODUCTION</div>
+        </div>
+        <div class="header-center">
+            <div class="summary-pill">
+                <span class="pill-dot green"></span>
+                <span id="healthy-count">8</span> Healthy
+            </div>
+            <div class="summary-pill">
+                <span class="pill-dot orange"></span>
+                <span id="warning-count">2</span> Warning
+            </div>
+            <div class="summary-pill">
+                <span class="pill-dot red"></span>
+                <span id="critical-count">1</span> Critical
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="last-updated">Last updated: <span id="last-update">--</span></span>
+            <button class="btn-refresh" id="refresh-btn">↻ Refresh</button>
+        </div>
+    </header>
+
+    <main class="dashboard-body">
+        <div class="main-grid">
+            <!-- Server Cards Section -->
+            <section class="servers-section">
+                <h2 class="section-title">Server Fleet</h2>
+                <div class="servers-grid" id="servers-grid"></div>
+            </section>
+
+            <!-- Right Sidebar -->
+            <aside class="sidebar">
+                <!-- Alert Panel -->
+                <div class="panel alert-panel">
+                    <div class="panel-title">
+                        <span class="title-icon">⚠</span> Active Alerts
+                        <span class="alert-count" id="alert-count-badge">5</span>
+                    </div>
+                    <div class="alerts-list" id="alerts-list"></div>
+                </div>
+
+                <!-- Services Status -->
+                <div class="panel services-panel">
+                    <div class="panel-title">
+                        <span class="title-icon">⬡</span> Services Health
+                    </div>
+                    <div class="services-list" id="services-list"></div>
+                </div>
+
+                <!-- Network Metrics -->
+                <div class="panel network-panel">
+                    <div class="panel-title">
+                        <span class="title-icon">↕</span> Network I/O
+                    </div>
+                    <div class="network-stats" id="network-stats"></div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
